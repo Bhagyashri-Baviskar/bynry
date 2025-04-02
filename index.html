@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile List with Map</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&callback=initMap" async defer></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Profiles</h1>
+
+        <!-- Form to Add New Profile -->
+        <div class="form-container">
+            <input type="text" id="nameInput" placeholder="Enter name" required>
+            <input type="text" id="descriptionInput" placeholder="Enter description" required>
+            <input type="file" id="imageInput" accept="image/*">
+            <button onclick="addProfile()">Add Profile</button>
+        </div>
+
+        <!-- Search Bar -->
+        <input type="text" id="searchBar" placeholder="Search profiles..." class="search-bar" onkeyup="filterProfiles()">
+
+        <!-- Profiles Grid -->
+        <div id="profilesGrid" class="profiles-grid"></div>
+
+        <!-- Map Display -->
+        <div id="mapContainer" class="map-container" style="display:none;">
+            <h2 id="mapTitle"></h2>
+            <div id="map" class="map"></div>
+        </div>
+    </div>
+
+    <script>
+                let profiles = [
+            { id: 1, name: "Pooja Patil", photo:"female 1.jpg", description: "Software Engineer", address: { lat: 37.7749, lng: -122.4194 } },
+            { id: 2, name: "Shubham Mane", photo: "male1.png", description: "Product Manager", address: { lat: 40.7128, lng: -74.006 } },
+            { id: 3, name: "Avi Kumar", photo: "male2.png", description: "UX Designer", address: { lat: 41.8781, lng: -87.6298 } },
+            { id: 4, name: "Raj Sharma", photo: "male3.jpg", description: "Data Scientist", address: { lat: 30.2672, lng: -97.7431 } },
+            { id: 5, name: "Neha Singh", photo: "female 3.jpg", description: "Marketing Specialist", address: { lat: 47.6062, lng: -122.3321 } },
+            { id: 6, name: "Rahul Verma", photo: "male 5.jpg", description: "Cybersecurity Analyst", address: { lat: 39.7392, lng: -104.9903 } },
+            { id: 7, name: "Rajashri Varma", photo: "female 2.png", description: "HR Manager", address: { lat: 34.0522, lng: -118.2437 } },
+            { id: 8, name: "Sanya Kapoor", photo: "male 4.png", description: "AI Researcher", address: { lat: 42.3601, lng: -71.0589 } },
+            { id: 7, name: "Piyush Varma", photo: "male 6.jpg", description: "HR Manager", address: { lat: 34.0522, lng: -118.2437 } },
+            { id: 8, name: "Sanjaya Kapoor", photo: "male 7.png", description: "AI Researcher", address: { lat: 42.3601, lng: -71.0589 } }
+        ];
+
+        function displayProfiles() {
+            const profilesGrid = document.getElementById("profilesGrid");
+            profilesGrid.innerHTML = "";
+            profiles.forEach(profile => {
+                const profileCard = document.createElement("div");
+                profileCard.classList.add("profile-card");
+
+                profileCard.innerHTML = `
+                    <img src="${profile.photo}" alt="${profile.name}" class="profile-pic">
+                    <h2>${profile.name}</h2>
+                    <p>${profile.description}</p>
+                    <button onclick='showOnMap(${JSON.stringify(profile.address)}, "${profile.name}")'>Show on Map</button>
+                `;
+                profilesGrid.appendChild(profileCard);
+            });
+        }
+
+        function addProfile() {
+            const name = document.getElementById("nameInput").value;
+            const description = document.getElementById("descriptionInput").value;
+            const imageInput = document.getElementById("imageInput").files[0];
+
+            if (!name || !description || !imageInput) {
+                alert("Please fill all fields and select an image.");
+                return;
+            }
+
+            // Convert image to a temporary URL
+            const imageUrl = URL.createObjectURL(imageInput);
+
+            // Create new profile object
+            const newProfile = {
+                id: profiles.length + 1,
+                name: name,
+                photo: imageUrl,
+                description: description,
+                address: { lat: 37.7749, lng: -122.4194 } // Default location
+            };
+
+            profiles.push(newProfile);
+            displayProfiles();
+
+            // Clear input fields
+            document.getElementById("nameInput").value = "";
+            document.getElementById("descriptionInput").value = "";
+            document.getElementById("imageInput").value = "";
+        }
+
+        function showOnMap(address, name) {
+            document.getElementById("mapTitle").textContent = `Location of ${name}`;
+            document.getElementById("mapContainer").style.display = "block";
+            const map = new google.maps.Map(document.getElementById("map"), {
+                center: address,
+                zoom: 12,
+            });
+            new google.maps.Marker({ position: address, map: map });
+        }
+
+        function filterProfiles() {
+            const searchTerm = document.getElementById("searchBar").value.toLowerCase();
+            const filteredProfiles = profiles.filter(profile => profile.name.toLowerCase().includes(searchTerm));
+            document.getElementById("profilesGrid").innerHTML = "";
+            filteredProfiles.forEach(profile => {
+                const profileCard = document.createElement("div");
+                profileCard.classList.add("profile-card");
+                profileCard.innerHTML = `
+                    <img src="${profile.photo}" alt="${profile.name}" class="profile-pic">
+                    <h2>${profile.name}</h2>
+                    <p>${profile.description}</p>
+                    <button onclick='showOnMap(${JSON.stringify(profile.address)}, "${profile.name}")'>Show on Map</button>
+                `;
+                document.getElementById("profilesGrid").appendChild(profileCard);
+            });
+        }
+
+        window.onload = displayProfiles;
+    </script>
+
+    
+</body>
+</html>
